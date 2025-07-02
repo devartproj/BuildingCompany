@@ -1,37 +1,4 @@
 # Building Company
-# Building Company
-
-A Java project demonstrating object-oriented programming concepts.
-
-## Project Structure
-
-```
-src/main/java/com/solvd/buildingcompany/
-├── models/
-│   ├── workers/
-│   │   ├── AbstractWorker.java
-│   │   ├── AbstractConstructionTeamMember.java
-│   │   ├── Builder.java
-│   │   ├── Electrician.java
-│   │   └── Plumber.java
-│   ├── BuildingMaterial.java
-│   ├── ConstructionResult.java
-│   ├── ConstructionSite.java
-│   ├── ConstructionTeam.java
-│   └── Project.java
-├── interfaces/
-│   ├── Buildable.java
-│   ├── ConstructionWorker.java
-│   ├── CostCalculatable.java
-│   ├── Inspectable.java
-│   └── Reportable.java
-├── services/
-│   └── ConstructionCalculator.java
-└── Main.java
-```
-
-## Features
-# Building Company
 
 A Java project demonstrating object-oriented programming concepts with a focus on construction company operations.
 
@@ -87,59 +54,8 @@ mvn package
 The application uses Log4j2 for logging. Configuration can be found in `src/main/resources/log4j2.xml`.
 
 Logs are written to both console and file (`logs/buildingcompany.log`).
-- Construction project management
-- Team building with specialized workers
-- Cost and time estimation
-- Building materials handling
-- Construction site inspection
-- Logging with Log4j2
 
 ## Requirements
-
-- Java 21
-- Maven 3.8+
-
-## Running the Project
-
-```bash
-mvn clean compile
-mvn exec:java -Dexec.mainClass="com.solvd.buildingcompany.Main"
-```
-Это учебный проект для демонстрации концепций объектно-ориентированного программирования на Java.
-
-## Структура проекта
-
-Проект имеет следующую структуру пакетов:
-
-- `com.solvd.buildingcompany` - корневой пакет
-  - `models` - модели данных
-    - `workers` - классы работников
-  - `interfaces` - интерфейсы
-  - `services` - сервисные классы
-
-## Функциональность
-
-Проект моделирует работу строительной компании, включая:
-- Управление строительными проектами
-- Формирование строительных команд из разных специалистов
-- Расчет стоимости и времени выполнения строительных работ
-- Учет строительных материалов
-- Инспекцию строительных площадок
-
-## Логирование
-
-В проекте используется Log4j2 для логирования. Настройки логирования находятся в файле `src/main/resources/log4j2.xml`.
-
-## Запуск проекта
-
-Для запуска проекта используйте Maven:
-
-```bash
-mvn clean compile
-mvn exec:java -Dexec.mainClass="com.solvd.buildingcompany.Main"
-```
-
-## Требования
 
 - Java 21
 - Maven 3.8+
