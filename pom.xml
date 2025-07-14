@@ -14,6 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <log4j.version>2.22.1</log4j.version>
         <maven.compiler.release>21</maven.compiler.release>
+        <commons.lang.version>3.13.0</commons.lang.version>
+        <commons.io.version>2.15.1</commons.io.version>
     </properties>
 
     <dependencies>
@@ -27,6 +29,18 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
+        </dependency>
+        <!-- Apache Commons Lang for StringUtils -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons.lang.version}</version>
+        </dependency>
+        <!-- Apache Commons IO for FileUtils -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons.io.version}</version>
         </dependency>
     </dependencies>
 
@@ -95,7 +109,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.solvd.buildingcompany.Main</mainClass>
+                    <mainClass>com.solvd.buildingcompany.TestMain</mainClass>
                 </configuration>
             </plugin>
         </plugins>
@@ -106,6 +120,7 @@
                 <includes>
                     <include>**/*.xml</include>
                     <include>**/*.properties</include>
+                    <include>**/*.txt</include>
                 </includes>
             </resource>
         </resources>
