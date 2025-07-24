@@ -104,7 +104,7 @@ public class MaterialInventory<T extends BuildingMaterial> {
     public boolean removeMaterial(String name) {
         T material = materialCatalog.remove(name);
         if (material != null) {
-            stockItems.remove(material);
+            stockItems.removeIf(item -> item.getName().equals(name));
             LOGGER.debug("Removed material from inventory: {}", name);
             return true;
         }

@@ -1,9 +1,14 @@
 package com.solvd.buildingcompany.models;
 
 import com.solvd.buildingcompany.interfaces.Reportable;
+import com.solvd.buildingcompany.interfaces.TeamFilter;
+import com.solvd.buildingcompany.models.workers.AbstractConstructionTeamMember;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ConstructionResult implements Reportable {
     private static final Logger LOGGER = LogManager.getLogger(ConstructionResult.class);
@@ -73,5 +78,32 @@ public class ConstructionResult implements Reportable {
     public String toString() {
         return String.format("ConstructionResult: %s (Cost: $%.2f, Duration: %.1f days)",
                 project.getName(), estimatedCost, estimatedDuration);
+    }
+
+    /**
+     * Counts team members that match a specified criteria
+     * @param filter The filter criteria to apply
+     * @return Count of matching team members
+     */
+    public <T extends AbstractConstructionTeamMember> long countTeamMembersByFilter(TeamFilter<T> filter) {
+        @SuppressWarnings("unchecked")
+        List<T> membersList = (List<T>) team.getMembers();
+        return membersList.stream()
+                .filter(filter::test)
+                .count();
+    }
+
+    /**
+     * Gets a list of team member names that match a specified criteria
+     * @param filter The filter criteria to apply
+     * @return List of team member names
+     */
+    public <T extends AbstractConstructionTeamMember> List<String> getTeamMemberNamesByFilter(TeamFilter<T> filter) {
+        @SuppressWarnings("unchecked")
+        List<T> membersList = (List<T>) team.getMembers();
+        return membersList.stream()
+                .filter(filter::test)
+                .map(AbstractConstructionTeamMember::getName)
+                .collect(Collectors.toList());
     }
 }

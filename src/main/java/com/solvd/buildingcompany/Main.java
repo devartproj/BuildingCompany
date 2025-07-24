@@ -8,6 +8,9 @@ import com.solvd.buildingcompany.exceptions.BudgetExceededException;
 import com.solvd.buildingcompany.exceptions.InsufficientTeamSizeException;
 import com.solvd.buildingcompany.exceptions.InvalidMaterialException;
 import com.solvd.buildingcompany.exceptions.ProjectSizeTooLargeException;
+import com.solvd.buildingcompany.interfaces.CostEstimator;
+import com.solvd.buildingcompany.interfaces.MaterialProcessor;
+import com.solvd.buildingcompany.interfaces.TeamFilter;
 import com.solvd.buildingcompany.models.*;
 import com.solvd.buildingcompany.models.workers.AbstractConstructionTeamMember;
 import com.solvd.buildingcompany.models.workers.Builder;
@@ -108,6 +111,33 @@ public class Main {
                 System.out.println("Next project: " + schedule.getNextProject(today).getName());
                 System.out.println("Project in 2 months: " + schedule.getNextProject(today.plusMonths(2)).getName());
 
+                // Using stream to filter projects
+                System.out.println("\n=== Using Stream Operations ===");
+                List<Project> allProjects = new ArrayList<>();
+                allProjects.add(houseProject);
+                allProjects.add(officeProject);
+                allProjects.add(garageProject);
+
+                System.out.println("Projects with area greater than 100 sqm:");
+                allProjects.stream()
+                        .filter(p -> p.getArea() > 100)
+                        .map(Project::getName)
+                        .forEach(name -> System.out.println("- " + name));
+
+                // Using functional interfaces
+                System.out.println("\n=== Using Functional Interfaces ===");
+                CostEstimator simpleEstimator = (area, coef) -> area * coef;
+                System.out.println("Simple cost estimate for house: $" +
+                        simpleEstimator.calculateEstimatedCost(houseProject.getArea(), 1000));
+
+                MaterialProcessor uppercaseProcessor = material -> material.toUpperCase();
+                System.out.println("Processed materials:");
+                allProjects.stream()
+                        .map(Project::getMaterial)
+                        .map(uppercaseProcessor::processMaterial)
+                        .distinct()
+                        .forEach(System.out::println);
+
                 try {
                     // Calculate project costs and timeline using the generic team
                     ConstructionCalculator calculator = new ConstructionCalculator();
@@ -117,8 +147,27 @@ public class Main {
                     LOGGER.info("Team size: {}", team.getSize());
                     LOGGER.info("Unique specializations: {}", team.getUniqueSpecializations());
                     LOGGER.info("Team lead: {}", team.getTeamLead().getName());
-                    LOGGER.info("Builders in team: {}", team.getMembersByPosition("Builder").size());
+
+                    // Using streams instead of direct size method
+                    long builderCount = team.getMembers().stream()
+                            .filter(member -> "Builder".equals(member.getPosition()))
+                            .count();
+                    LOGGER.info("Builders in team: {}", builderCount);
                     LOGGER.info("Calculation result: {}", result);
+
+                    // Using TeamFilter functional interface
+                    System.out.println("\n=== Using TeamFilter Functional Interface ===");
+                    // Filter for experienced team members (experience > 3)
+                    TeamFilter<AbstractConstructionTeamMember> experiencedFilter =
+                            member -> member.getExperienceLevel() > 3;
+                    long experiencedCount = result.countTeamMembersByFilter(experiencedFilter);
+                    System.out.println("Experienced team members: " + experiencedCount);
+
+                    // Filter for plumbers
+                    TeamFilter<AbstractConstructionTeamMember> plumberFilter =
+                            member -> "Plumber".equals(member.getPosition());
+                    List<String> plumberNames = result.getTeamMemberNamesByFilter(plumberFilter);
+                    System.out.println("Plumbers in team: " + String.join(", ", plumberNames));
 
                     // Create construction site and conduct inspection
                     ConstructionSite site = new ConstructionSite(houseProject, team, "123 Main St");

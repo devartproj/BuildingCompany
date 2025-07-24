@@ -3,6 +3,8 @@ package com.solvd.buildingcompany.services;
 import com.solvd.buildingcompany.exceptions.InvalidMaterialException;
 import com.solvd.buildingcompany.exceptions.InsufficientTeamSizeException;
 import com.solvd.buildingcompany.exceptions.BudgetExceededException;
+import com.solvd.buildingcompany.interfaces.CostEstimator;
+import com.solvd.buildingcompany.interfaces.MaterialProcessor;
 import com.solvd.buildingcompany.models.ConstructionResult;
 import com.solvd.buildingcompany.models.ConstructionTeam;
 import com.solvd.buildingcompany.models.Project;
@@ -26,7 +28,12 @@ public class ConstructionCalculator {
             throw new InsufficientTeamSizeException("Team is too small for construction project", teamSize, 3);
         }
 
-        double materialCost = calculateMaterialCost(project);
+        // Using CostEstimator functional interface
+        CostEstimator materialCostEstimator = (area, coefficient) -> area * coefficient * project.getFloors();
+
+        // Get coefficient based on material
+        double coefficient = getMaterialCoefficient(project.getMaterial());
+        double materialCost = materialCostEstimator.calculateEstimatedCost(project.getArea(), coefficient);
         double laborCost = calculateLaborCost(project, team);
         double totalCost = materialCost + laborCost;
 
@@ -41,26 +48,32 @@ public class ConstructionCalculator {
         return new ConstructionResult(project, team, totalCost, duration);
     }
 
-            public double calculateMaterialCost(Project project) throws InvalidMaterialException {
-        double costPerSquareMeter;
-        String material = project.getMaterial().toLowerCase();
+    private double getMaterialCoefficient(String material) throws InvalidMaterialException {
+        MaterialProcessor materialProcessor = mat -> mat.toLowerCase();
+        String processedMaterial = materialProcessor.processMaterial(material);
 
-        if ("brick".equals(material)) {
-            costPerSquareMeter = BRICK_COST;
-        } else if ("wood".equals(material)) {
-            costPerSquareMeter = WOOD_COST;
-        } else if ("concrete".equals(material)) {
-            costPerSquareMeter = CONCRETE_COST;
-        } else {
-            throw new InvalidMaterialException("Unsupported building material: " + project.getMaterial());
+        switch (processedMaterial) {
+            case "brick":
+                return BRICK_COST;
+            case "wood":
+                return WOOD_COST;
+            case "concrete":
+                return CONCRETE_COST;
+            default:
+                throw new InvalidMaterialException("Unsupported building material: " + material);
         }
+    }
 
-        double area = project.getArea();
-        int floors = project.getFloors();
-        double cost = area * costPerSquareMeter * floors;
+    public double calculateMaterialCost(Project project) throws InvalidMaterialException {
+        // Using CostEstimator functional interface
+        CostEstimator materialCostEstimator = (area, coefficient) -> area * coefficient * project.getFloors();
 
-        LOGGER.debug("Material cost calculated: ${}", cost);
-        return cost;
+        // Get coefficient based on material
+        double coefficient = getMaterialCoefficient(project.getMaterial());
+        double materialCost = materialCostEstimator.calculateEstimatedCost(project.getArea(), coefficient);
+
+        LOGGER.debug("Material cost calculated: ${}", materialCost);
+        return materialCost;
     }
 
     public double calculateLaborCost(Project project, ConstructionTeam team) {

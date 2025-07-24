@@ -81,10 +81,20 @@ public class Project implements Buildable, Reportable {
 
     @Override
     public double estimateCost(ConstructionTeam team) throws InvalidMaterialException {
+        if (team == null) {
+            throw new IllegalArgumentException("Construction team cannot be null");
+        }
+
         ConstructionCalculator calculator = new ConstructionCalculator();
-        double cost = calculator.calculateMaterialCost(this) + calculator.calculateLaborCost(this, team);
-        LOGGER.debug("Project cost estimated: ${}", cost);
-        return cost;
+
+        // Расчет стоимости материалов через новый метод
+        double materialCost = calculator.calculateMaterialCost(this);
+        // Расчет стоимости работы
+        double laborCost = calculator.calculateLaborCost(this, team);
+
+        double totalCost = materialCost + laborCost;
+        LOGGER.debug("Project cost estimated: ${}", totalCost);
+        return totalCost;
     }
 
     @Override

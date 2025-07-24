@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ConstructionTeam<T extends AbstractConstructionTeamMember> {
     private static final Logger LOGGER = LogManager.getLogger(ConstructionTeam.class);
@@ -26,10 +27,7 @@ public class ConstructionTeam<T extends AbstractConstructionTeamMember> {
 
         // Update position map
         String position = member.getPosition();
-        if (!membersByPosition.containsKey(position)) {
-            membersByPosition.put(position, new ArrayList<>());
-        }
-        membersByPosition.get(position).add(member);
+        membersByPosition.computeIfAbsent(position, k -> new ArrayList<>()).add(member);
 
         // Track unique specialization
         uniqueSpecializations.add(member.getPosition());
@@ -77,6 +75,29 @@ public class ConstructionTeam<T extends AbstractConstructionTeamMember> {
         return members.stream()
                 .max(Comparator.comparingInt(AbstractConstructionTeamMember::getExperienceLevel))
                 .orElse(null);
+    }
+
+    /**
+     * Finds team members with experience level greater than specified value
+     * @param minExperience The minimum experience level
+     * @return List of members with experience above the threshold
+     */
+    public List<T> getExperiencedMembers(int minExperience) {
+        return members.stream()
+                .filter(member -> member.getExperienceLevel() > minExperience)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a map of positions to number of members with that position
+     * @return Map with positions and counts
+     */
+    public Map<String, Long> getMemberCountByPosition() {
+        return members.stream()
+                .collect(Collectors.groupingBy(
+                    AbstractConstructionTeamMember::getPosition,
+                    Collectors.counting()
+                ));
     }
 
     @Override
