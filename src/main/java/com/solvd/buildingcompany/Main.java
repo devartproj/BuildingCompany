@@ -1,5 +1,7 @@
 package com.solvd.buildingcompany;
 
+import com.solvd.buildingcompany.annotations.BuildingOperation;
+import com.solvd.buildingcompany.annotations.BuildingOperationInfo;
 import com.solvd.buildingcompany.collections.CustomLinkedList;
 import com.solvd.buildingcompany.enums.BuildingType;
 import com.solvd.buildingcompany.enums.ConstructionPhase;
@@ -16,12 +18,19 @@ import com.solvd.buildingcompany.models.workers.AbstractConstructionTeamMember;
 import com.solvd.buildingcompany.models.workers.Builder;
 import com.solvd.buildingcompany.models.workers.Electrician;
 import com.solvd.buildingcompany.models.workers.Plumber;
+import com.solvd.buildingcompany.services.BuildingOperationService;
 import com.solvd.buildingcompany.services.ConstructionCalculator;
+import com.solvd.buildingcompany.utils.MessageLogger;
+import com.solvd.buildingcompany.utils.MessageType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
@@ -186,6 +195,79 @@ public class Main {
             } catch (ProjectSizeTooLargeException e) {
                 LOGGER.error("Project size too large: {}sqm (maximum: {}sqm)",
                         e.getActualSize(), e.getMaxAllowedSize());
+            }
+
+            // Демонстрация использования MessageLogger
+            System.out.println("\n=== Демонстрация MessageLogger (Singleton pattern) ===");
+            System.out.println("Запуск демонстрации работы с сообщениями в многопоточной среде...");
+
+            // Получаем экземпляр MessageLogger (Singleton)
+            MessageLogger logger = MessageLogger.getInstance();
+            logger.logMessage("Main", MessageType.INFO, "Демонстрация работы с потокобезопасным логгером");
+
+            // Create and start several threads for demonstration
+            ExecutorService demoExecutor = Executors.newFixedThreadPool(3);
+            CountDownLatch demoLatch = new CountDownLatch(3);
+
+            for (int i = 0; i < 3; i++) {
+                final int threadNum = i + 1;
+                demoExecutor.submit(() -> {
+                    try {
+                        String threadName = "DemoThread-" + threadNum;
+                        // Log different types of messages
+                        logger.logMessage(threadName, MessageType.INFO,
+                                "Message from demonstration thread " + threadNum);
+                        Thread.sleep(100);
+
+                        if (threadNum == 2) {
+                            logger.logWarning(threadName, "This is a warning from thread " + threadNum);
+                        } else if (threadNum == 3) {
+                            logger.logError(threadName, "This is an error message from thread " + threadNum);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        demoLatch.countDown();
+                    }
+                });
+            }
+
+            try {
+                demoLatch.await(2, TimeUnit.SECONDS);
+                System.out.println("Total messages sent: " + logger.getMessageCount());
+                System.out.println("For complete demonstration run these classes:");
+                System.out.println("- com.solvd.buildingcompany.examples.MessageLoggerDemo");
+                System.out.println("- com.solvd.buildingcompany.examples.ThreadSafeConstruction\n");
+
+                // BuildingOperationService demonstration
+                System.out.println("=== BuildingOperationService Demonstration ====");
+                List<BuildingOperationInfo> highPriorityOps = BuildingOperationService.getHighPriorityOperations(Project.class);
+                System.out.println("High priority operations in Project:");
+                for (BuildingOperationInfo info : highPriorityOps) {
+                    System.out.println(" - " + info.getMethodName() + ": " + info.getDescription());
+                }
+
+                // Annotation caching demonstration
+                long startTime = System.nanoTime();
+                BuildingOperationInfo info1 = BuildingOperationService.getMethodOperationInfo(Project.class, "estimateCost");
+                long firstCallTime = System.nanoTime() - startTime;
+
+                startTime = System.nanoTime();
+                BuildingOperationInfo info2 = BuildingOperationService.getMethodOperationInfo(Project.class, "estimateCost");
+                long secondCallTime = System.nanoTime() - startTime;
+
+                System.out.println("\nAnnotation caching demonstration:");
+                System.out.println("First call time: " + firstCallTime + " ns");
+                System.out.println("Second call time: " + secondCallTime + " ns");
+                System.out.println("Speed-up: " + (firstCallTime / (double) secondCallTime) + "x\n");
+
+                demoExecutor.shutdown();
+                if (!demoExecutor.awaitTermination(2, TimeUnit.SECONDS)) {
+                    demoExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                demoExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
             }
 
             LOGGER.info("Application execution completed");
