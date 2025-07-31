@@ -1,5 +1,7 @@
 package com.solvd.buildingcompany.models;
 
+import com.solvd.buildingcompany.annotations.BuildingOperation;
+import com.solvd.buildingcompany.annotations.Priority;
 import com.solvd.buildingcompany.exceptions.InvalidMaterialException;
 import com.solvd.buildingcompany.exceptions.ProjectSizeTooLargeException;
 import com.solvd.buildingcompany.interfaces.Buildable;
@@ -9,6 +11,10 @@ import com.solvd.buildingcompany.services.ConstructionCalculator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@BuildingOperation(
+    description = "Represents a construction project with all its details",
+    priority = Priority.HIGH
+)
 public class Project implements Buildable, Reportable {
     private static final Logger LOGGER = LogManager.getLogger(Project.class);
 
@@ -73,6 +79,11 @@ public class Project implements Buildable, Reportable {
     }
 
     @Override
+    @BuildingOperation(
+        description = "Calculates the estimated construction time for the project",
+        priority = Priority.HIGH,
+        requiredTools = {"project-planner", "calculator"}
+    )
     public double calculateConstructionTime() {
         double time = this.area * this.floors * 0.5;
         LOGGER.debug("Construction time estimated: {} days", time);
@@ -80,6 +91,12 @@ public class Project implements Buildable, Reportable {
     }
 
     @Override
+    @BuildingOperation(
+        description = "Estimates the total cost of the construction project",
+        priority = Priority.CRITICAL,
+        estimatedCost = 0.0,
+        requiredTools = {"cost-calculator", "material-database"}
+    )
     public double estimateCost(ConstructionTeam team) throws InvalidMaterialException {
         if (team == null) {
             throw new IllegalArgumentException("Construction team cannot be null");

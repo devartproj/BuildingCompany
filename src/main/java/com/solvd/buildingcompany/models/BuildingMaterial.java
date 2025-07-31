@@ -5,42 +5,25 @@ import com.solvd.buildingcompany.interfaces.CostCalculatable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BuildingMaterial implements CostCalculatable {
+public record BuildingMaterial(
+        String name,
+        double pricePerUnit,
+        String unitType
+) implements CostCalculatable {
+
     private static final Logger LOGGER = LogManager.getLogger(BuildingMaterial.class);
 
-    private String name;
-    private double pricePerUnit;
-    private String unitType;
-
-    public BuildingMaterial(String name, double pricePerUnit, String unitType) {
-        this.name = name;
-        this.pricePerUnit = pricePerUnit;
-        this.unitType = unitType;
+    public BuildingMaterial {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        if (pricePerUnit <= 0) {
+            throw new IllegalArgumentException("Price per unit must be positive");
+        }
+        if (unitType == null || unitType.trim().isEmpty()) {
+            throw new IllegalArgumentException("Unit type cannot be null or empty");
+        }
         LOGGER.debug("Building material created: {} (${} per {})", name, pricePerUnit, unitType);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getPricePerUnit() {
-        return pricePerUnit;
-    }
-
-    public void setPricePerUnit(double pricePerUnit) {
-        this.pricePerUnit = pricePerUnit;
-    }
-
-    public String getUnitType() {
-        return unitType;
-    }
-
-    public void setUnitType(String unitType) {
-        this.unitType = unitType;
     }
 
     @Override

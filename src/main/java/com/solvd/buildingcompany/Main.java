@@ -90,7 +90,7 @@ public class Main {
                 inventory.orderMaterial(cement);
                 inventory.orderMaterial(paint);
                 BuildingMaterial processedOrder = inventory.processPendingOrder();
-                LOGGER.info("Processed order: {}", processedOrder.getName());
+                LOGGER.info("Processed order: {}", processedOrder.name());
 
                 // Demonstrate ProjectSchedule with generics
                 LOGGER.info("\n=== Project Schedule Demo ===");

@@ -23,9 +23,9 @@ public class MaterialInventory<T extends BuildingMaterial> {
     }
 
     public void addMaterial(T material) {
-        materialCatalog.put(material.getName(), material);
+        materialCatalog.put(material.name(), material);
         stockItems.add(material);
-        LOGGER.debug("Added material to inventory: {}", material.getName());
+        LOGGER.debug("Added material to inventory: {}", material.name());
     }
 
     public T getMaterial(String name) {
@@ -49,13 +49,13 @@ public class MaterialInventory<T extends BuildingMaterial> {
 
     public void orderMaterial(T material) {
         pendingOrders.add(material);
-        LOGGER.debug("Added material to order queue: {}", material.getName());
+        LOGGER.debug("Added material to order queue: {}", material.name());
     }
 
     public T processPendingOrder() {
         T material = pendingOrders.poll();
         if (material != null) {
-            LOGGER.debug("Processed pending order: {}", material.getName());
+            LOGGER.debug("Processed pending order: {}", material.name());
         } else {
             LOGGER.debug("No pending orders to process");
         }
@@ -104,7 +104,7 @@ public class MaterialInventory<T extends BuildingMaterial> {
     public boolean removeMaterial(String name) {
         T material = materialCatalog.remove(name);
         if (material != null) {
-            stockItems.removeIf(item -> item.getName().equals(name));
+            stockItems.removeIf(item -> item.name().equals(name));
             LOGGER.debug("Removed material from inventory: {}", name);
             return true;
         }
